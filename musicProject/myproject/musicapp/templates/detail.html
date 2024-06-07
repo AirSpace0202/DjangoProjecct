@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>详细分类信息饼状图</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.0/dist/echarts.min.js"></script>
+</head>
+<body>
+    <h1>详细分类信息饼状图</h1>
+    <div id="main" style="width: 600px; height: 400px; margin: 0 auto;"></div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            const classifyData = JSON.parse('{{ classify_data|safe }}');
+            console.log(classifyData);  // 调试信息
+
+            const groupedData = classifyData.reduce((acc, { artist_classify }) => {
+                acc[artist_classify] = (acc[artist_classify] || 0) + 1;
+                return acc;
+            }, {});
+
+            const chartData = Object.entries(groupedData).map(([name, value]) => ({ name, value }));
+
+            var chartDom = document.getElementById('main');
+            var myChart = echarts.init(chartDom);
+
+            var option = {
+                title: {
+                    text: '详细分类信息饼状图',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        name: '歌手分类',
+                        type: 'pie',
+                        radius: '50%',
+                        data: chartData,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+
+            myChart.on('click', function(params) {
+                const category = params.name;
+                const encodedCategory = encodeURIComponent(category);
+                const targetURL = `{% url 'artist_list' 'DUMMY_CATEGORY' %}`.replace('DUMMY_CATEGORY', encodedCategory);
+                window.location.href = targetURL;
+            });
+        });
+    </script>
+</body>
+</html>

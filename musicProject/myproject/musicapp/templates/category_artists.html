@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ category_name }} - 歌手粉丝数</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.0/dist/echarts.min.js"></script>
+</head>
+<body>
+    <h1>{{ category_name }} - 歌手粉丝数</h1>
+    <div id="main" style="width: 600px; height: 400px;"></div>
+
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var chartDom = document.getElementById('main');
+            var myChart = echarts.init(chartDom);
+            var option;
+
+            // 从 Django 模板标签传递到 JavaScript 中的数据
+            const data = JSON.parse('{{ artists|safe }}');
+
+            // 获取歌手名和粉丝数
+            const artistNames = data.map(entry => entry.artist_name);
+            const fansCounts = data.map(entry => entry.fan_cnt);
+
+            // 配置 eCharts
+            option = {
+                title: {
+                    text: '{{ category_name }} - 歌手粉丝数'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: artistNames
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: '粉丝数',
+                        type: 'line',
+                        data: fansCounts
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        });
+    </script>
+
+    <a href="{% url 'index' %}">返回主页</a>
+</body>
+</html>
+
+
